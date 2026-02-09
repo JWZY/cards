@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Game UI</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  height: 100dvh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---- Play Area ---- */
+.play-area {
+  position: absolute;
+  isolation: isolate;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 600px;
+  height: 300px;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.play-area.drop-hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.play-area.field-full {
+  border-color: rgba(255, 60, 60, 0.5);
+}
+
+.field-full-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 40, 40, 0.3);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 5;
+}
+
+.play-area.field-full .field-full-overlay {
+  opacity: 1;
+}
+
+.play-area .card-slot {
+  --i: 0;
+  --n: 1;
+  transform: none;
+  transform-origin: center center;
+}
+
+/* ---- Hand ---- */
+.hand {
+  position: fixed;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 30px;
+  z-index: 10;
+}
+
+/* ---- Card Slot (outer wrapper) ---- */
+.card-slot {
+  --i: 0;
+  --n: 6;
+  --angle: calc((var(--i) - (var(--n) - 1) / 2) * 5deg);
+  width: 140px;
+  height: 196px;
+  flex-shrink: 0;
+  cursor: grab;
+  transform-origin: center 600px;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              margin 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.3s;
+  will-change: transform;
+  z-index: calc(var(--i) + 1);
+}
+
+/* Fan mode (default) */
+.hand .card-slot {
+  margin-left: -30px;
+  margin-right: -30px;
+  transform: rotate(var(--angle));
+}
+
+.hand .card-slot:first-child { margin-left: 0; }
+.hand .card-slot:last-child { margin-right: 0; }
+
+/* Flat mode */
+.hand.flat .card-slot {
+  margin-left: 4px;
+  margin-right: 4px;
+  transform: rotate(0deg);
+  transform-origin: center center;
+}
+
+/* Hover state */
+.hand .card-slot.hovered {
+  z-index: 100;
+  transform: rotate(var(--angle)) translateY(-30px);
+}
+
+.hand.flat .card-slot.hovered {
+  transform: rotate(0deg) translateY(-30px);
+}
+
+/* Dragging */
+.card-slot.dragging {
+  position: fixed;
+  z-index: 1000;
+  cursor: grabbing;
+  pointer-events: none;
+  transition: none;
+  transform: rotate(0deg) scale(1.05) !important;
+  transform-origin: center center !important;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+}
+
+/* Placeholder for reorder */
+.card-placeholder {
+  width: 140px;
+  height: 196px;
+  flex-shrink: 0;
+  border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: 12px;
+  transition: margin 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.hand .card-placeholder {
+  margin-left: -30px;
+  margin-right: -30px;
+}
+
+.hand.flat .card-placeholder {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+/* ---- Card Inner (holographic target) ---- */
+.card-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #1a1a2e;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5),
+              0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.card-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  pointer-events: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
+/* ---- Lightbox ---- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  transition: background 0.3s;
+}
+
+.lightbox.active {
+  background: rgba(0, 0, 0, 0.85);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.lightbox-card {
+  width: 362px;
+  height: 510px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: #1a1a2e;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  transform: scale(0.8);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.35s;
+}
+
+.lightbox.active .lightbox-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.lightbox-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
+/* ---- Toggle Button ---- */
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.toggle-btn:hover, .reset-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.reset-btn {
+  position: fixed;
+  top: 20px;
+  right: 150px;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* ---- Cards played on table ---- */
+.play-area .card-slot {
+  cursor: default;
+  animation: card-land 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes card-land {
+  from { transform: scale(1.1); opacity: 0.7; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="play-area" id="playArea">
+  <div class="field-full-overlay">Field is full</div>
+</div>
+
+<div class="hand" id="hand"></div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-card" id="lightboxCard">
+    <img src="syndicate.png" alt="Card" draggable="false">
+  </div>
+</div>
+
+<button class="reset-btn" id="resetBtn">Reset</button>
+<button class="toggle-btn" id="toggleBtn">Flat Layout</button>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>
