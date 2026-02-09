@@ -2,7 +2,7 @@
 
 Interactive card game hand UI with holographic effects, drag-and-drop, and lightbox preview. Vanilla JS, no build step.
 
-![Preview](preview.png)
+<video src="https://github.com/JWZY/cards/raw/main/demo.mp4" autoplay loop muted playsinline width="100%"></video>
 
 **[Live Demo](https://jwzy.github.io/cards/)**
 
