@@ -32,12 +32,12 @@ resetHintTimer();
 
 // ---- Card Art ----
 const CARD_IMAGES = [
-  'Syndicate.png',
-  'Call of the Slayer.png',
-  'Divine Wielder.png',
-  'School of Knowledge.png',
-  'School of War.png',
-  'Syndicate.png',
+  'syndicate.png',
+  'call-of-the-slayer.png',
+  'divine-wielder.png',
+  'school-of-knowledge.png',
+  'school-of-war.png',
+  'syndicate.png',
 ];
 
 // ---- Card Creation ----
