@@ -2,7 +2,7 @@ import { HolographicEffect } from './holographic-effect/holographic.js';
 
 // ---- Constants ----
 const CARD_COUNT = 6;
-const MAX_FIELD = 3;
+const MAX_FIELD = 2;
 const HOLD_DELAY = 400;
 const DRAG_THRESHOLD = 8;
 
@@ -19,6 +19,26 @@ let cards = [];          // { slot, inner, img, holoEffect } objects in hand
 let playedCards = [];    // cards dropped onto the play area
 let isFan = true;
 let lightboxEffect = null;
+let hintTimer = null;
+
+function resetHintTimer() {
+  playArea.classList.remove('show-hint');
+  clearTimeout(hintTimer);
+  if (playedCards.length === 0) {
+    hintTimer = setTimeout(() => playArea.classList.add('show-hint'), 3000);
+  }
+}
+resetHintTimer();
+
+// ---- Card Art ----
+const CARD_IMAGES = [
+  'Syndicate.png',
+  'Call of the Slayer.png',
+  'Divine Wielder.png',
+  'School of Knowledge.png',
+  'School of War.png',
+  'Syndicate.png',
+];
 
 // ---- Card Creation ----
 
@@ -32,7 +52,7 @@ function createCard(index, total) {
   inner.className = 'card-inner';
 
   const img = document.createElement('img');
-  img.src = 'syndicate.png';
+  img.src = CARD_IMAGES[index % CARD_IMAGES.length];
   img.alt = 'Card';
   img.draggable = false;
 
@@ -80,6 +100,7 @@ resetBtn.addEventListener('click', () => {
     card.holoEffect = new HolographicEffect(card.inner);
   }
   reindexHand();
+  resetHintTimer();
 });
 
 // ---- Hover ----
@@ -104,7 +125,10 @@ hand.addEventListener('pointerout', (e) => {
 
 // ---- Lightbox ----
 
-function openLightbox() {
+const lightboxImg = lightboxCard.querySelector('img');
+
+function openLightbox(cardSrc) {
+  lightboxImg.src = cardSrc;
   lightbox.classList.add('active');
   lightboxEffect = new HolographicEffect(lightboxCard);
 }
@@ -152,13 +176,46 @@ hand.addEventListener('pointerdown', (e) => {
     holdTimer: setTimeout(() => {
       if (pointerState && !pointerState.isDragging) {
         // Hold detected — open lightbox
+        const src = pointerState.card.img.src;
         cleanupPointer(true);
-        openLightbox();
+        openLightbox(src);
       }
     }, HOLD_DELAY),
     placeholder: null,
     originalIndex: cards.indexOf(card),
   };
+});
+
+// ---- Play Area Card Preview ----
+
+let playAreaPointer = null;
+
+playArea.addEventListener('pointerdown', (e) => {
+  const slot = e.target.closest('.card-slot');
+  if (!slot) return;
+
+  const card = playedCards.find(c => c.slot === slot);
+  if (!card) return;
+
+  e.preventDefault();
+  playAreaPointer = {
+    card,
+    holdTimer: setTimeout(() => {
+      if (playAreaPointer) {
+        const src = playAreaPointer.card.img.src;
+        playAreaPointer = null;
+        openLightbox(src);
+      }
+    }, HOLD_DELAY),
+  };
+});
+
+playArea.addEventListener('pointerup', (e) => {
+  if (!playAreaPointer) return;
+  clearTimeout(playAreaPointer.holdTimer);
+  const src = playAreaPointer.card.img.src;
+  playAreaPointer = null;
+  openLightbox(src);
 });
 
 document.addEventListener('pointermove', (e) => {
@@ -185,8 +242,10 @@ document.addEventListener('pointerup', (e) => {
   if (pointerState.isDragging) {
     endDrag(e);
   } else {
-    // Short click (no hold, no drag) — do nothing (hold timer handles lightbox)
+    // Click (released without dragging) — open lightbox
+    const src = pointerState.card.img.src;
     cleanupPointer(true);
+    openLightbox(src);
   }
 });
 
@@ -308,6 +367,7 @@ function endDrag(e) {
     // Re-init holo on table
     card.holoEffect = new HolographicEffect(card.inner);
     reindexHand();
+    resetHintTimer();
   } else {
     // Return to hand — replace placeholder with card
     const nextSibling = placeholder.nextSibling;
