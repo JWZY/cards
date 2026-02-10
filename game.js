@@ -1,7 +1,7 @@
 import { HolographicEffect } from './holographic-effect/holographic.js';
 
 // ---- Constants ----
-const CARD_COUNT = 6;
+const CARD_COUNT = 5;
 const MAX_FIELD = 2;
 const HOLD_DELAY = 400;
 const DRAG_THRESHOLD = 8;
@@ -37,7 +37,6 @@ const CARD_IMAGES = [
   'divine-wielder.png',
   'school-of-knowledge.png',
   'school-of-war.png',
-  'syndicate.png',
 ];
 
 // ---- Card Creation ----

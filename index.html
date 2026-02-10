@@ -167,42 +167,44 @@ body {
   }
 
   .card-slot {
-    width: 140px;
-    height: 196px;
+    width: 110px;
+    height: 154px;
   }
   .card-placeholder {
-    width: 140px;
-    height: 196px;
+    width: 110px;
+    height: 154px;
   }
 
   .hand-wrapper {
-    overflow-x: auto;
-    overflow-y: visible;
-    padding-top: 50px;
+    overflow: visible;
+    padding-top: 30px;
     padding-bottom: 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
   }
-  .hand-wrapper::-webkit-scrollbar { display: none; }
 
   .hand {
-    padding-left: 30px;
-    padding-right: 30px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   /* Force flat on mobile */
   .hand .card-slot {
-    margin-left: -20px;
-    margin-right: -20px;
+    margin-left: -27px;
+    margin-right: -27px;
     transform: rotate(0deg);
     transform-origin: center center;
   }
   .hand .card-slot.hovered {
-    transform: rotate(0deg) translateY(-30px);
+    transform: rotate(0deg) translateY(-20px);
   }
   .hand .card-placeholder {
-    margin-left: -20px;
-    margin-right: -20px;
+    margin-left: -27px;
+    margin-right: -27px;
+  }
+
+  .lightbox-card {
+    height: auto;
+    width: 88vw;
+    max-height: 85vh;
   }
 }
 
