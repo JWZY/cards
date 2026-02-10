@@ -363,6 +363,7 @@ body {
   :root {
     --card-w: clamp(100px, 28vw, 140px);
     --card-m: clamp(-35px, -6vw, -20px);
+    --card-m-fan: clamp(-55px, -10vw, -35px);
   }
 
   .play-area {
@@ -395,14 +396,14 @@ body {
     padding-right: 12px;
   }
 
-  /* Tighter margins on mobile */
+  /* Fan mode on mobile — tighter overlap */
   .hand .card-slot {
-    margin-left: var(--card-m);
-    margin-right: var(--card-m);
+    margin-left: var(--card-m-fan);
+    margin-right: var(--card-m-fan);
   }
   .hand .card-placeholder {
-    margin-left: var(--card-m);
-    margin-right: var(--card-m);
+    margin-left: var(--card-m-fan);
+    margin-right: var(--card-m-fan);
   }
 
   /* Flat mode on mobile */

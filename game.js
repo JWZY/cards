@@ -81,6 +81,13 @@ function reindexHand() {
 
 // ---- Layout Toggle ----
 
+const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+if (isMobile) {
+  isFan = false;
+  hand.classList.add('flat');
+  toggleBtn.textContent = 'Fan Layout';
+}
+
 toggleBtn.addEventListener('click', () => {
   isFan = !isFan;
   hand.classList.toggle('flat', !isFan);
