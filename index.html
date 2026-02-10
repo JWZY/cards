@@ -395,17 +395,22 @@ body {
     padding-right: 12px;
   }
 
-  /* Force flat on mobile/tablet */
+  /* Tighter margins on mobile */
   .hand .card-slot {
     margin-left: var(--card-m);
     margin-right: var(--card-m);
-    transform: rotate(0deg);
-    transform-origin: center center;
-  }
-  .hand .card-slot.hovered {
-    transform: rotate(0deg) translateY(-20px);
   }
   .hand .card-placeholder {
+    margin-left: var(--card-m);
+    margin-right: var(--card-m);
+  }
+
+  /* Flat mode on mobile */
+  .hand.flat .card-slot {
+    margin-left: var(--card-m);
+    margin-right: var(--card-m);
+  }
+  .hand.flat .card-placeholder {
     margin-left: var(--card-m);
     margin-right: var(--card-m);
   }
